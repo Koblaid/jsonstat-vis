@@ -96,19 +96,21 @@ const chart1 = (ctx, dataSet) => {
   })
 }
 
-const chart2 = (ctx) => {
+const chart2 = (ctx, dataSet) => {
   // TODO: https://github.com/chartjs/Chart.js/issues/1852
 
+  const groupedData = groupByAge(dataSet)
+  const sortedKeys = getSortedKeys(groupedData)
+  const data = sortedKeys.map(key => (groupedData[key].values.F / groupedData[key].values.M) - 1)
+
   var horizontalBarChartData = {
-    labels: ['Age 4', 'Age 9', 'Age 14', 'Age 19', 'Age 24', 'Age 29', 'Age 34', 'Age 39', 'Age 44', 'Age 49', 'Age 54', 'Age 59', 'Age 64', 'Age 69', 'Age 74', 'Age 79', 'Age 84', 'Age 89', 'Older'],
+    labels: sortedKeys.map(key => groupedData[key].label),
     datasets: [{
       label: 'Dataset 1',
       backgroundColor: 'red',
       borderColor: 'yellow',
       borderWidth: 1,
-      data: [
-        1, -2, 3, -1, 5, 7,
-      ]
+      data,
     }]
 
   };
