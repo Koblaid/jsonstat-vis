@@ -8,8 +8,8 @@ import _ from 'lodash'
 
 
 
-const getDataSet = () => {
-  return fetch('https://json-stat.org/samples/canada.json')
+const getDataSet = uri => {
+  return fetch(uri)
     .then(res => res.json())
     .then(jsonDoc => {
       const j = jsonstat(jsonDoc)
@@ -139,7 +139,7 @@ const chart2 = (ctx, dataSet) => {
 
 class App extends Component {
   componentDidMount() {
-    getDataSet().then(dataSet => {
+    getDataSet('https://json-stat.org/samples/canada.json').then(dataSet => {
       chart1(this.chartCanvas1, dataSet)
       chart2(this.chartCanvas2, dataSet)
     })
