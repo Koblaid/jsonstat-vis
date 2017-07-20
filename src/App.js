@@ -6,41 +6,43 @@ import chartJs from 'chart.js'
 import _ from 'lodash'
 
 
-const x = () => {
+
+
+const getDataSet = () => {
   return fetch('https://json-stat.org/samples/canada.json')
     .then(res => res.json())
     .then(jsonDoc => {
       const j = jsonstat(jsonDoc)
       const d = j.Dataset(0)
-
-
-      const a1 = _(d.toTable({ type: 'arrobj', content: 'id'}))
-        .filter({concept: 'POP'})
-        .reject({age: 'T'})
-        .groupBy('age')
-        .mapValues((value, key) => {
-          const values = {}
-          for (const obj of value) {
-            values[obj.sex] = obj.value
-          }
-          return {
-            values,
-            label: d.Dimension('age').Category(key).label,
-          }
-        })
-        .value()
-
-      const sortedKeys = obj => _(a1)
-        .keys()
-        .map(age => parseInt(age, 10) || age)
-        .sortBy()
-        .value()
-
-
-      const result = j.Dataset(0).toTable({ type: 'arrobj', content: 'id', by: 'age', prefix: 'data_' })
-      return result
+      return d
     })
 }
+
+const getSortedKeys = obj => _(obj)
+  .keys()
+  .map(age => parseInt(age, 10) || age)
+  .sortBy()
+  .value()
+
+
+const groupByAge = d => {
+  return _(d.toTable({ type: 'arrobj', content: 'id'}))
+    .filter({concept: 'POP'})
+    .reject({age: 'T'})
+    .groupBy('age')
+    .mapValues((value, key) => {
+      const values = {}
+      for (const obj of value) {
+        values[obj.sex] = obj.value
+      }
+      return {
+        values,
+        label: d.Dimension('age').Category(key).label,
+      }
+    })
+    .value()
+}
+
 
 const chartColors = {
   red: 'rgb(255, 99, 132)',
@@ -60,73 +62,24 @@ const getNextColor = () => {
   return color
 }
 
-const chart1 = (ctx, data) => {
-  console.log(ctx)
-  const dataSets = Object
-    .values(data)
-    .filter(d => d.concept === 'POP' && d.age !== 'T')
+const chart1 = (ctx, dataSet) => {
+  const groupedData = groupByAge(dataSet)
+  const sortedKeys = getSortedKeys(groupedData)
 
-  const preparedDatasets = {}
-  for (const set of dataSets) {
-    console.log('set', set)
-
-    /* Shape of `set`:
-     {
-     country: 'CA',
-     year: '2012',
-     ...
-     data_T: 17309.1,
-     data_4: 988.7,
-     data_9: 955,
-     data_14: 964.7,
-     data_19: 1108.2,
-     ...
-     data_79: 418.9,
-     data_84: 303.6,
-     data_89: 164.1,
-     data_older: 73.2,
-     }
-     */
-    const values = _(set)
-      // Drop keys which are not values
-      .pickBy((value, key) => key.startsWith('data_') && key !== 'data_T')
-      // Convert to array of [key, value] arrays
-      .toPairs()
-      // Sort array by the integer extracted from the first element
-      .sortBy(pair => parseInt(pair[0].replace('data_', ''), 10))
-      // We only need the value
-      .map(pair => pair[1])
-      .value()
-    // console.log('values', values)
-
-    preparedDatasets[set.sex] = values
-  }
-
-  const labels = _(data[0])
-    .keys()
-    .filter(v => v.startsWith('data_') && v !== 'data_T' && v !== 'data_older')
-    .map(v => parseInt(v.replace('data_', ''), 10))
-    .sortBy()
-    .map(v => `Age ${v}`)
-    .value()
-  labels.push('Older')
-
-
-  const chartDataSets = _.map(preparedDatasets, (value, key) => {
+  const chartDataSets = _.map(['T', 'F', 'M'], sex => {
     return {
-      label: key,
-      data: value,
+      label: sex,
+      data: sortedKeys.map(key => groupedData[key].values[sex]),
       backgroundColor: getNextColor(),
       borderColor: 'rgba(255,99,132,1)',
       borderWidth: 1,
     }
   })
 
-  console.log(chartDataSets, labels)
   new chartJs(ctx, {
     type: 'bar',
     data: {
-      labels,
+      labels: sortedKeys.map(key => groupedData[key].label),
       datasets: chartDataSets,
     },
     options: {
@@ -184,9 +137,9 @@ const chart2 = (ctx) => {
 
 class App extends Component {
   componentDidMount() {
-    x().then(data => {
-      chart1(this.chartCanvas1, data)
-      chart2(this.chartCanvas2, data)
+    getDataSet().then(dataSet => {
+      chart1(this.chartCanvas1, dataSet)
+      chart2(this.chartCanvas2, dataSet)
     })
   }
 
