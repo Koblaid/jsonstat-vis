@@ -124,11 +124,73 @@ const chart2 = (ctx, dataSet) => {
   });
 }
 
+
+const chart3 = (ctx, dataSet) => {
+  console.log(dataSet.toTable({ type: 'arrobj', content: 'id'}))
+
+  const groupedData = _(dataSet.toTable({ type: 'arrobj', content: 'id'}))
+    .groupBy('Region')
+    .mapValues((value, key) => {
+      const values = {}
+      for (const obj of value) {
+        values[obj.Arealtype] = obj.value
+      }
+      return {
+        values,
+        label: dataSet.Dimension('Region').Category(key).label,
+      }
+    })
+    .value()
+
+
+  const sortedKeys = _(groupedData)
+    .keys()
+    .sortBy(key => dataSet.Dimension('Region').Category(key).label)
+    .value()
+
+  const colors = {
+    1: chartColors.green,
+    2: chartColors.blue,
+  }
+
+  const chartDataSets = _.map(['1', '2'], (valueType, index) => {
+    return {
+      label: dataSet.Dimension('Arealtype').Category(valueType).label,
+      data: sortedKeys.map(key => groupedData[key].values[valueType]),
+      backgroundColor: colors[index],
+      borderColor: 'rgba(255,99,132,1)',
+      borderWidth: 1,
+    }
+  })
+
+
+  new chartJs(ctx, {
+    type: 'horizontalBar',
+    data: {
+      labels: sortedKeys.map(key => groupedData[key].label),
+      datasets: chartDataSets,
+    },
+    options: {
+      title: {
+        display: true,
+        text: 'Land / Water area by region'
+      },
+      legend: {
+        display: true
+      },
+    }
+  });
+}
+
 class App extends Component {
   componentDidMount() {
     getDataSet('https://json-stat.org/samples/canada.json').then(dataSet => {
       chart1(this.chartCanvas1, dataSet)
       chart2(this.chartCanvas2, dataSet)
+    })
+
+    getDataSet('http://data.ssb.no/api/v0/dataset/85430.json?lang=en').then(dataSet => {
+      chart3(this.chartCanvas3, dataSet)
     })
   }
 
@@ -143,6 +205,11 @@ class App extends Component {
         <canvas
           ref={canvas => {
             this.chartCanvas2 = canvas
+          }}
+        />
+        <canvas height="1000"
+          ref={canvas => {
+            this.chartCanvas3 = canvas
           }}
         />
       </div>
