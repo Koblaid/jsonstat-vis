@@ -68,7 +68,7 @@ const chart1 = (ctx, dataSet) => {
 
   const chartDataSets = _.map(['T', 'F', 'M'], sex => {
     return {
-      label: sex,
+      label: dataSet.Dimension('sex').Category(sex).label,
       data: sortedKeys.map(key => groupedData[key].values[sex]),
       backgroundColor: getNextColor(),
       borderColor: 'rgba(255,99,132,1)',
@@ -83,14 +83,9 @@ const chart1 = (ctx, dataSet) => {
       datasets: chartDataSets,
     },
     options: {
-      scales: {
-        yAxes: [
-          {
-            ticks: {
-              // beginAtZero: true,
-            },
-          },
-        ],
+      title: {
+        display: true,
+        text: 'Population by age and sex',
       },
     },
   })
@@ -103,36 +98,28 @@ const chart2 = (ctx, dataSet) => {
   const sortedKeys = getSortedKeys(groupedData)
   const data = sortedKeys.map(key => (groupedData[key].values.F / groupedData[key].values.M) - 1)
 
-  var horizontalBarChartData = {
+  const horizontalBarChartData = {
     labels: sortedKeys.map(key => groupedData[key].label),
     datasets: [{
-      label: 'Dataset 1',
+
       backgroundColor: 'red',
       borderColor: 'yellow',
       borderWidth: 1,
       data,
-    }]
-
+    }],
   };
+
   new chartJs(ctx, {
     type: 'horizontalBar',
     data: horizontalBarChartData,
     options: {
-      // Elements options apply to all of the options unless overridden in a dataset
-      // In this case, we are setting the border of each horizontal bar to be 2px wide
-      elements: {
-        rectangle: {
-          borderWidth: 2,
-        }
-      },
-      responsive: true,
-      // legend: {
-      //   position: 'right',
-      // },
       title: {
         display: true,
-        text: 'Chart.js Horizontal Bar Chart'
-      }
+        text: 'Sex ratio by age'
+      },
+      legend: {
+        display: false,
+      },
     }
   });
 }
@@ -148,13 +135,6 @@ class App extends Component {
   render() {
     return (
       <div className="App">
-        <div className="App-header">
-          <img src={logo} className="App-logo" alt="logo" />
-          <h2>Welcome to React</h2>
-        </div>
-        <p className="App-intro">
-          To get started, edit <code>src/App.js</code> and save to reload.
-        </p>
         <canvas
           ref={canvas => {
             this.chartCanvas1 = canvas
