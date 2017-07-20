@@ -29,7 +29,7 @@ const renderChart = (ctx, dataSet) => {
     options: {
       title: {
         display: true,
-        text: 'Sex ratio by age'
+        text: 'Canada: Sex ratio by age (2012)'
       },
       legend: {
         display: false,
@@ -38,7 +38,7 @@ const renderChart = (ctx, dataSet) => {
   });
 }
 
-
+// Data: http://json-stat.com/explorer/#/https%3A%2F%2Fjson-stat.org%2Fsamples%2Fcanada.json
 export default () => <ChartContainer
   url="https://json-stat.org/samples/canada.json"
   renderChart={renderChart}

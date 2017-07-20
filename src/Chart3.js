@@ -38,7 +38,7 @@ const renderChart = (ctx, dataSet) => {
     options: {
       title: {
         display: true,
-        text: 'Land / Water area by region'
+        text: 'Norway: Land / Water area by region (2017)'
       },
       legend: {
         display: true
@@ -47,7 +47,8 @@ const renderChart = (ctx, dataSet) => {
   });
 }
 
-
+// Source: http://data.ssb.no/api/v0/dataset/85430?lang=en
+// Data visualization: http://json-stat.com/explorer/#/http%3A%2F%2Fdata.ssb.no%2Fapi%2Fv0%2Fdataset%2F85430.json%3Flang%3Den
 export default () => <ChartContainer
   url="http://data.ssb.no/api/v0/dataset/85430.json?lang=en"
   height="1000"

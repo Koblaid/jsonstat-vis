@@ -29,13 +29,13 @@ const renderChart = (ctx, dataSet) => {
     options: {
       title: {
         display: true,
-        text: 'Population by age and sex',
+        text: 'Canada: Population by age and sex (2012)',
       },
     },
   })
 }
 
-
+// Data: http://json-stat.com/explorer/#/https%3A%2F%2Fjson-stat.org%2Fsamples%2Fcanada.json
 export default () => <ChartContainer
   url="https://json-stat.org/samples/canada.json"
   renderChart={renderChart}
