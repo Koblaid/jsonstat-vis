@@ -18,9 +18,9 @@ const getDataSet = uri => {
     })
 }
 
-const getSortedKeys = obj => _(obj)
+const getSortedKeysByInt = obj => _(obj)
   .keys()
-  .map(age => parseInt(age, 10) || age)
+  .map(v => parseInt(v, 10) || v)
   .sortBy()
   .value()
 
@@ -73,7 +73,7 @@ const getNextColor = () => {
 
 const chart1 = (ctx, dataSet) => {
   const groupedData = groupBy(dataSet, 'age', 'sex', {concept: 'POP'}, {age: 'T'})
-  const sortedKeys = getSortedKeys(groupedData)
+  const sortedKeys = getSortedKeysByInt(groupedData)
 
   const chartDataSets = _.map(['T', 'F', 'M'], sex => {
     return {
@@ -104,7 +104,7 @@ const chart2 = (ctx, dataSet) => {
   // TODO: https://github.com/chartjs/Chart.js/issues/1852
 
   const groupedData = groupBy(dataSet, 'age', 'sex', {concept: 'POP'}, {age: 'T'})
-  const sortedKeys = getSortedKeys(groupedData)
+  const sortedKeys = getSortedKeysByInt(groupedData)
   const data = sortedKeys.map(key => (groupedData[key].values.F / groupedData[key].values.M) - 1)
 
   const horizontalBarChartData = {
