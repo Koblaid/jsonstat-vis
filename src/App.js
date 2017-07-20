@@ -6,130 +6,11 @@ import chartJs from 'chart.js'
 import _ from 'lodash'
 
 
-function checkds(ds){
-  if(ds===null || ds.length===0 || ds.class!=="dataset"){
-    return false;
-  }
-
-  for(var i=ds.length, len=1; i--;){
-    len*=ds.Dimension(i).length;
-  }
-  if(len!==ds.n){
-    return false;
-  }
-  return true;
-}
-
-
-const JSONstat=jsonstat
-function dataset(j, dsid){
-  if(typeof j==="undefined"){
-    return null;
-  }
-  if(
-    typeof j==="string" || //uri (synchronous!)
-    typeof j.length==="undefined" //JSON-stat response
-  ){
-    j=JSONstat(j);
-  }
-
-  if(j.length===0 ||
-    (
-      j.class!=="dataset" &&
-      j.class!=="collection" &&
-      j.class!=="bundle"
-    )
-  ){
-    return null;
-  }
-
-  return (j.class==="dataset") ? j : j.Dataset(dsid);
-}
-
-
-function toCSV(jsonstat, options){
-  if(typeof jsonstat==="undefined"){
-    return null;
-  }
-
-  if(typeof options==="undefined"){
-    options={};
-  }
-
-  var
-    csv=[],
-    vlabel=options.vlabel || "Value", //Same default as .toTable()
-    slabel=options.slabel || "Status", //Same default as .toTable()
-    status=(options.status===true), //Same default as .toTable()
-    na=options.na || "n/a",
-    delimiter=options.delimiter || ",",
-    decimal=(delimiter===";") ?
-      (options.decimal || ",")
-      :
-      (options.decimal || "."),
-    dsid=options.dsid || 0,
-    ds=dataset(jsonstat, dsid)
-  ;
-
-  if(!checkds(ds)){
-    return null;
-  }
-
-  var
-    table=ds.toTable({vlabel: vlabel, slabel: slabel, status: status, type: "array"}),
-    vcol=table[0].indexOf(vlabel),
-    scol=status ? table[0].indexOf(slabel) : -1
-  ;
-
-  // console.log(table, vcol, scol)
-
-  table.forEach(function(r, j){
-    // console.log('r', r)
-    r.forEach(function(c, i){
-      if(j && i===vcol){
-        if(c===null){
-          r[i]='"' + na + '"';
-        }else{
-          if(decimal!=="."){
-            r[i]=String(r[i]).replace(".", decimal);
-          }
-        }
-      }else{
-        if(j && i===scol && c===null){
-          r[i]=""; //Status does not use n/a because usually laking of status means "normal".
-        }else{
-          r[i]='"' + r[i] + '"';
-        }
-      }
-    });
-
-    // console.log('join', r)
-    csv+=r.join(delimiter)+"\n";
-  });
-  console.log(csv)
-  return csv;
-}
-
-
-
 const x = () => {
   return fetch('https://json-stat.org/samples/canada.json')
     .then(res => res.json())
     .then(jsonDoc => {
       const j = jsonstat(jsonDoc)
-      // console.log(d.id)
-      // console.log('concept', d.Dimension('concept').class)
-      // console.log(d.Dimension('sex'))
-      // console.log(d.Dimension('year'))
-      // console.log(d.Dimension('country'))
-      // console.log(d.Dataset(0).Data({ country: 'CA', year: '2012', sex: 'T', age: '4', concept: 'POP' }).value)
-      // console.log(d.Dataset(0).toTable())
-      // console.log(1000, d.Dataset(0).toTable({ type: 'array', content: 'id' }))
-      console.log(toCSV(j))
-      const x = j.Dataset(0).toTable()
-      _.groupBy(x, )
-
-
       const d = j.Dataset(0)
 
 
@@ -149,7 +30,6 @@ const x = () => {
         })
         .value()
 
-
       const sortedKeys = obj => _(a1)
         .keys()
         .map(age => parseInt(age, 10) || age)
@@ -158,8 +38,6 @@ const x = () => {
 
 
       const result = j.Dataset(0).toTable({ type: 'arrobj', content: 'id', by: 'age', prefix: 'data_' })
-      // console.log(result)
-      // console.log(JSON.stringify(result[1]))
       return result
     })
 }
