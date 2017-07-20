@@ -1,8 +1,9 @@
-import React, { Component } from 'react'
+import React from 'react'
 import _ from 'lodash'
 import chartJs from 'chart.js'
 
 import * as utils from './utils'
+import ChartContainer from './ChartContainer'
 
 
 const renderChart = (ctx, dataSet) => {
@@ -35,20 +36,7 @@ const renderChart = (ctx, dataSet) => {
 }
 
 
-export default class Chart1 extends Component {
-  componentDidMount() {
-    utils.getDataSet('https://json-stat.org/samples/canada.json').then(dataSet => {
-      renderChart(this.chartCanvas, dataSet)
-    })
-  }
-
-  render() {
-    return (
-      <canvas
-        ref={canvas => {
-          this.chartCanvas = canvas
-        }}
-      />
-    )
-  }
-}
+export default () => <ChartContainer
+  url="https://json-stat.org/samples/canada.json"
+  renderChart={renderChart}
+/>

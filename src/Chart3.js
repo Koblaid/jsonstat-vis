@@ -1,8 +1,9 @@
-import React, { Component } from 'react'
+import React from 'react'
 import _ from 'lodash'
 import chartJs from 'chart.js'
 
 import * as utils from './utils'
+import ChartContainer from './ChartContainer'
 
 
 const renderChart = (ctx, dataSet) => {
@@ -47,20 +48,8 @@ const renderChart = (ctx, dataSet) => {
 }
 
 
-export default class Chart3 extends Component {
-  componentDidMount() {
-    utils.getDataSet('http://data.ssb.no/api/v0/dataset/85430.json?lang=en').then(dataSet => {
-      renderChart(this.chartCanvas, dataSet)
-    })
-  }
-
-  render() {
-    return (
-      <canvas height="1000"
-        ref={canvas => {
-          this.chartCanvas = canvas
-        }}
-      />
-    )
-  }
-}
+export default () => <ChartContainer
+  url="http://data.ssb.no/api/v0/dataset/85430.json?lang=en"
+  height="1000"
+  renderChart={renderChart}
+/>
