@@ -25,19 +25,28 @@ const getSortedKeys = obj => _(obj)
   .value()
 
 
-const groupByAge = d => {
-  return _(d.toTable({ type: 'arrobj', content: 'id'}))
-    .filter({concept: 'POP'})
-    .reject({age: 'T'})
-    .groupBy('age')
+
+const groupBy = (dataset, groupDimension, dataDimension, filters, rejects) => {
+  let chain = _(dataset.toTable({ type: 'arrobj', content: 'id'}))
+
+  if(!_.isEmpty(filters)){
+    chain = chain.filter(filters)
+  }
+
+  if(!_.isEmpty(rejects)){
+    chain = chain.reject(rejects)
+  }
+
+  return chain
+    .groupBy(groupDimension)
     .mapValues((value, key) => {
       const values = {}
       for (const obj of value) {
-        values[obj.sex] = obj.value
+        values[obj[dataDimension]] = obj.value
       }
       return {
         values,
-        label: d.Dimension('age').Category(key).label,
+        label: dataset.Dimension(groupDimension).Category(key).label,
       }
     })
     .value()
@@ -63,7 +72,7 @@ const getNextColor = () => {
 }
 
 const chart1 = (ctx, dataSet) => {
-  const groupedData = groupByAge(dataSet)
+  const groupedData = groupBy(dataSet, 'age', 'sex', {concept: 'POP'}, {age: 'T'})
   const sortedKeys = getSortedKeys(groupedData)
 
   const chartDataSets = _.map(['T', 'F', 'M'], sex => {
@@ -94,7 +103,7 @@ const chart1 = (ctx, dataSet) => {
 const chart2 = (ctx, dataSet) => {
   // TODO: https://github.com/chartjs/Chart.js/issues/1852
 
-  const groupedData = groupByAge(dataSet)
+  const groupedData = groupBy(dataSet, 'age', 'sex', {concept: 'POP'}, {age: 'T'})
   const sortedKeys = getSortedKeys(groupedData)
   const data = sortedKeys.map(key => (groupedData[key].values.F / groupedData[key].values.M) - 1)
 
@@ -126,23 +135,7 @@ const chart2 = (ctx, dataSet) => {
 
 
 const chart3 = (ctx, dataSet) => {
-  console.log(dataSet.toTable({ type: 'arrobj', content: 'id'}))
-
-  const groupedData = _(dataSet.toTable({ type: 'arrobj', content: 'id'}))
-    .groupBy('Region')
-    .mapValues((value, key) => {
-      const values = {}
-      for (const obj of value) {
-        values[obj.Arealtype] = obj.value
-      }
-      return {
-        values,
-        label: dataSet.Dimension('Region').Category(key).label,
-      }
-    })
-    .value()
-
-
+  const groupedData = groupBy(dataSet, 'Region', 'Arealtype')
   const sortedKeys = _(groupedData)
     .keys()
     .sortBy(key => dataSet.Dimension('Region').Category(key).label)
