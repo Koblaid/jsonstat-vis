@@ -5,6 +5,7 @@ import jsonstat from 'jsonstat'
 import chartJs from 'chart.js'
 import _ from 'lodash'
 
+import * as utils from './utils'
 
 
 
@@ -17,41 +18,6 @@ const getDataSet = uri => {
       return d
     })
 }
-
-const getSortedKeysByInt = obj => _(obj)
-  .keys()
-  .map(v => parseInt(v, 10) || v)
-  .sortBy()
-  .value()
-
-
-
-const groupBy = (dataset, groupDimension, dataDimension, filters, rejects) => {
-  let chain = _(dataset.toTable({ type: 'arrobj', content: 'id'}))
-
-  if(!_.isEmpty(filters)){
-    chain = chain.filter(filters)
-  }
-
-  if(!_.isEmpty(rejects)){
-    chain = chain.reject(rejects)
-  }
-
-  return chain
-    .groupBy(groupDimension)
-    .mapValues((value, key) => {
-      const values = {}
-      for (const obj of value) {
-        values[obj[dataDimension]] = obj.value
-      }
-      return {
-        values,
-        label: dataset.Dimension(groupDimension).Category(key).label,
-      }
-    })
-    .value()
-}
-
 
 const chartColors = {
   red: 'rgb(255, 99, 132)',
@@ -72,8 +38,8 @@ const getNextColor = () => {
 }
 
 const chart1 = (ctx, dataSet) => {
-  const groupedData = groupBy(dataSet, 'age', 'sex', {concept: 'POP'}, {age: 'T'})
-  const sortedKeys = getSortedKeysByInt(groupedData)
+  const groupedData = utils.groupBy(dataSet, 'age', 'sex', {concept: 'POP'}, {age: 'T'})
+  const sortedKeys = utils.getSortedKeysByInt(groupedData)
 
   const chartDataSets = _.map(['T', 'F', 'M'], sex => {
     return {
@@ -103,8 +69,8 @@ const chart1 = (ctx, dataSet) => {
 const chart2 = (ctx, dataSet) => {
   // TODO: https://github.com/chartjs/Chart.js/issues/1852
 
-  const groupedData = groupBy(dataSet, 'age', 'sex', {concept: 'POP'}, {age: 'T'})
-  const sortedKeys = getSortedKeysByInt(groupedData)
+  const groupedData = utils.groupBy(dataSet, 'age', 'sex', {concept: 'POP'}, {age: 'T'})
+  const sortedKeys = utils.getSortedKeysByInt(groupedData)
   const data = sortedKeys.map(key => (groupedData[key].values.F / groupedData[key].values.M) - 1)
 
   const horizontalBarChartData = {
@@ -135,7 +101,7 @@ const chart2 = (ctx, dataSet) => {
 
 
 const chart3 = (ctx, dataSet) => {
-  const groupedData = groupBy(dataSet, 'Region', 'Arealtype')
+  const groupedData = utils.groupBy(dataSet, 'Region', 'Arealtype')
   const sortedKeys = _(groupedData)
     .keys()
     .sortBy(key => dataSet.Dimension('Region').Category(key).label)
