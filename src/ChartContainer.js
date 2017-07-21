@@ -12,9 +12,10 @@ export default class ChartContainer extends Component {
   }
 
   render() {
-    const {height} = this.props
+    const {height, width} = this.props
     return (
       <canvas height={height}
+              width={width}
               ref={canvas => {
                 this.chartCanvas = canvas
               }}
