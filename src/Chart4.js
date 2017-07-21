@@ -7,15 +7,18 @@ import ChartContainer from './ChartContainer'
 
 
 const renderChart = (ctx, dataSet) => {
-  const groupedData = utils.groupBy(dataSet, 'Tid', 'ContentsCode')
-  console.log(groupedData)
+  const groupDimension = 'Tid'
+  const dataDimension = 'ContentsCode'
+
+  const groupedData = utils.groupBy(dataSet, groupDimension, dataDimension)
+
   const sortedKeys = Object.keys(groupedData)
   sortedKeys.sort()
 
-  const chartDataSets = _.map(['Foretakkonk', 'Personligkonk', 'Tvalg', 'Tvang2', 'Tinglystutlegg'], contents => {
+  const chartDataSets = _.map(dataSet.Dimension(dataDimension).id, dimensionValue => {
     return {
-      label: dataSet.Dimension('ContentsCode').Category(contents).label,
-      data: sortedKeys.map(key => groupedData[key].values[contents]),
+      label: dataSet.Dimension(dataDimension).Category(dimensionValue).label,
+      data: sortedKeys.map(key => groupedData[key].values[dimensionValue]),
       backgroundColor: utils.getNextColor(),
       borderWidth: 1,
       fill: false,
