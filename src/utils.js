@@ -15,7 +15,7 @@ export const chartColors = {
 const chartColorsOrder = Object.keys(chartColors)
 let currentColorIndex = 0
 export const getNextColor = () => {
-  const color = chartColors[chartColorsOrder[currentColorIndex]]
+  const color = chartColors[chartColorsOrder[currentColorIndex % _.size(chartColors)]]
   currentColorIndex += 1
   return color
 }
