@@ -60,7 +60,7 @@ export const groupBy = (dataset, groupDimension, dataDimension, filters, rejects
       }
       return {
         values,
-        label: dataset.Dimension(groupDimension).Category(key).label,
+        label: dataset.Dimension(groupDimension) && dataset.Dimension(groupDimension).Category(key).label,
       }
     })
     .value()
