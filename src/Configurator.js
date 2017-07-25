@@ -87,8 +87,9 @@ class DataSet {
             this.ds = dataSet
           })
       },
+
       getTable(){
-        if(!this.ds || !this.groupDimension || !this.dataDimension){
+        if(!this.ds || !this.groupDimension || !this.dataDimension || this.groupDimension === this.dataDimension){
           return {}
         }
         const columnIds = this.ds.Dimension(this.dataDimension).id
@@ -195,44 +196,35 @@ const Chart = observer(class Chart extends Component {
 })
 
 
-const Configurator = observer(class Configurator extends Component {
-  constructor(){
-    super()
-    this._refs = {}
-    this.state = {}
-  }
+const Configurator = observer(({store}) => {
+  return <div>
 
-  render(){
-    const {store} = this.props
+    <label>JSON-stat URL
+      <input type="text" value={store.dataSet.jsonstatUrl} onChange={(e) => store.dataSet.jsonstatUrl = e.target.value}/>
+    </label>
 
-    return <div>
+    <button onClick={() => store.dataSet.load()}>Load data</button>
 
-      <label>JSON-stat URL
-        <input type="text" value={store.dataSet.jsonstatUrl} onChange={(e) => store.dataSet.jsonstatUrl = e.target.value}/>
-      </label>
+    <label>Group data by
+      <select value={store.dataSet.groupDimension} onChange={e => store.dataSet.groupDimension = e.target.value} disabled={!store.dataSet.isLoaded}>
+        {store.dataSet.dimensions.map((dimension, i) => <option key={i}>{dimension}</option>)}
+      </select>
+    </label>
 
-      <button onClick={() => store.dataSet.load()}>Load data</button>
+    <label>Category label
+      <select value={store.dataSet.dataDimension} onChange={e => store.dataSet.dataDimension = e.target.value} disabled={!store.dataSet.isLoaded}>
+        {store.dataSet.dimensions.map((dimension, i) => <option key={i}>{dimension}</option>)}
+      </select>
+    </label>}
 
-      <label>Group data by
-        <select value={store.dataSet.groupDimension} onChange={e => store.dataSet.groupDimension = e.target.value} disabled={!store.dataSet.isLoaded}>
-          {store.dataSet.dimensions.map((dimension, i) => <option key={i}>{dimension}</option>)}
-        </select>
-      </label>
+    <Tab panes={[
+      { menuItem: 'Data', render: () => <Tab.Pane><DataTable store={store.dataSet}/></Tab.Pane> },
+      { menuItem: 'Chart', render: () => <Tab.Pane><Chart store={store} /></Tab.Pane> },
+    ]} />
 
-      <label>Category label
-        <select value={store.dataSet.dataDimension} onChange={e => store.dataSet.dataDimension = e.target.value} disabled={!store.dataSet.isLoaded}>
-          {store.dataSet.dimensions.map((dimension, i) => <option key={i}>{dimension}</option>)}
-        </select>
-      </label>}
-
-      <Tab panes={[
-        { menuItem: 'Data', render: () => <Tab.Pane><DataTable store={store.dataSet}/></Tab.Pane> },
-        { menuItem: 'Chart', render: () => <Tab.Pane><Chart store={store} /></Tab.Pane> },
-      ]} />
-
-    </div>
-  }
+  </div>
 })
+
 
 
 const store = new Store();
