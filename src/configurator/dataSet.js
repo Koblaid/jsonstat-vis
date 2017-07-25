@@ -1,6 +1,6 @@
 import * as utils from '../utils'
 import _ from 'lodash'
-import {extendObservable} from 'mobx'
+import {extendObservable, action} from 'mobx'
 
 
 export default class DataSet {
@@ -10,6 +10,11 @@ export default class DataSet {
       jsonstatUrl: 'http://data.ssb.no/api/v0/dataset/85430.json?lang=en',
       groupDimension: '',
       dataDimension: '',
+
+      setjsonStatUrl: action(v => this.jsonstatUrl = v),
+      setDataSet: action(v => this.ds = v),
+      setGroupDimension: action(v => this.groupDimension = v),
+      setDataDimension: action(v => this.dataDimension = v),
 
       get isLoaded(){
         return Boolean(this.ds)
@@ -45,7 +50,7 @@ export default class DataSet {
       load(){
         utils.getDataSet(this.jsonstatUrl)
           .then((dataSet) => {
-            this.ds = dataSet
+            this.setDataSet(dataSet)
           })
       },
 

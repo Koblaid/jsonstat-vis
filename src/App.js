@@ -2,6 +2,7 @@ import React from 'react'
 import { Tab } from 'semantic-ui-react'
 import './App.css'
 import 'semantic-ui-css/semantic.min.css'
+import {useStrict} from 'mobx'
 
 import Configurator from './configurator'
 import Chart1 from './Chart1'
@@ -18,6 +19,7 @@ const panes = [
   { menuItem: 'Norway: Bankruptcies, ...', render: () => <Tab.Pane><Chart4 /></Tab.Pane> },
 ]
 
+useStrict(true)
 
 export default () => {
   return (

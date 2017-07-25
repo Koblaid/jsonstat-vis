@@ -68,7 +68,7 @@ const Chart = observer(class Chart extends Component {
 
     return <div>
       <label>Chart-Typ
-        <select value={store.chartType} onChange={e => store.chartType = e.target.value} disabled={!store.dataSet.isLoaded}>
+        <select value={store.chartType} onChange={e => store.setChartType(e.target.value)} disabled={!store.dataSet.isLoaded}>
           <option>bar</option>
           <option>horizontalBar</option>
           <option>line</option>

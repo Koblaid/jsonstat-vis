@@ -1,5 +1,5 @@
 import React from 'react'
-import {extendObservable} from 'mobx'
+import {extendObservable, action} from 'mobx'
 import { Tab } from 'semantic-ui-react'
 import {observer} from 'mobx-react'
 
@@ -12,6 +12,7 @@ class Store {
   constructor(){
     extendObservable(this, {
       dataSet: new DataSet(),
+      setChartType: action(v => this.chartType = v),
       chartType: 'bar',
       get isReadyToRender(){
         return store.chartType && this.dataSet.groupDimension && store.dataSet.dataDimension
@@ -25,19 +26,19 @@ const Configurator = observer(({store}) => {
   return <div>
 
     <label>JSON-stat URL
-      <input type="text" value={store.dataSet.jsonstatUrl} onChange={(e) => store.dataSet.jsonstatUrl = e.target.value}/>
+      <input type="text" value={store.dataSet.jsonstatUrl} onChange={(e) => store.dataSet.setjsonStatUrl(e.target.value)}/>
     </label>
 
     <button onClick={() => store.dataSet.load()}>Load data</button>
 
     <label>Group data by
-      <select value={store.dataSet.groupDimension} onChange={e => store.dataSet.groupDimension = e.target.value} disabled={!store.dataSet.isLoaded}>
+      <select value={store.dataSet.groupDimension} onChange={e => store.dataSet.setGroupDimension(e.target.value)} disabled={!store.dataSet.isLoaded}>
         {store.dataSet.dimensions.map((dimension, i) => <option key={i}>{dimension}</option>)}
       </select>
     </label>
 
     <label>Category label
-      <select value={store.dataSet.dataDimension} onChange={e => store.dataSet.dataDimension = e.target.value} disabled={!store.dataSet.isLoaded}>
+      <select value={store.dataSet.dataDimension} onChange={e => store.dataSet.setDataDimension(e.target.value)} disabled={!store.dataSet.isLoaded}>
         {store.dataSet.dimensions.map((dimension, i) => <option key={i}>{dimension}</option>)}
       </select>
     </label>}
