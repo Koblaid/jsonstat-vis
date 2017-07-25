@@ -1,5 +1,6 @@
 import React, {Component} from 'react'
 import _ from 'lodash'
+import { Tab, Table } from 'semantic-ui-react'
 import {observer} from 'mobx-react'
 import {extendObservable} from 'mobx'
 import chartJs from 'chart.js'
@@ -74,9 +75,53 @@ class Store {
       dataDimension: '',
       get dimensions () {
         return this.dataSet ? this.dataSet.id : []
-      }
+      },
+      get isReadyToRender(){
+        return store.chartType && store.groupDimension && store.dataDimension
+      },
     })
   }
+}
+
+
+const DataTable = ({store}) => {
+  const {dataSet, dataDimension, groupDimension} = store
+  if(!store.isReadyToRender){
+    return null
+  }
+
+  const columnIds = dataSet.Dimension(store.dataDimension).id
+  const columnLabels = _.map(columnIds, dimensionValue => {
+    return dataSet.Dimension(dataDimension).Category(dimensionValue).label
+  })
+
+  const groupedData = utils.groupBy(dataSet, groupDimension, dataDimension)
+
+  const sortedKeys = Object.keys(groupedData)
+  sortedKeys.sort()
+
+  return (
+    <Table celled padded>
+      <Table.Header>
+        <Table.Row>
+          <Table.HeaderCell></Table.HeaderCell>
+          {columnLabels.map(colHeader => <Table.HeaderCell>{colHeader}</Table.HeaderCell>)}
+        </Table.Row>
+      </Table.Header>
+
+      <Table.Body>
+        {sortedKeys.map(key => {
+          return <Table.Row>
+              <Table.Cell>{groupedData[key].label}</Table.Cell>
+              {columnIds.map(colId => {
+                return <Table.Cell>{groupedData[key].values[colId]}</Table.Cell>
+              })}
+
+          </Table.Row>
+        })}
+      </Table.Body>
+    </Table>
+  )
 }
 
 
@@ -99,7 +144,7 @@ const Configurator = observer(class Configurator extends Component {
     const {store} = this.props
     console.log(store)
 
-    if(!(store.chartType && store.groupDimension && store.dataDimension)){
+    if(!(store.isReadyToRender)){
       console.log('not all fields are selected')
       console.log(store.chartType , store.groupDimension , store.dataDimension)
       return
@@ -143,10 +188,10 @@ const Configurator = observer(class Configurator extends Component {
 
       <button onClick={() => this.renderChart()}>Render chart</button>
       <br />
-      <canvas ref={canvas => {
-                this._refs.chartCanvas = canvas
-              }}
-      />
+      <Tab panes={[
+        { menuItem: 'Data', render: () => <Tab.Pane><DataTable store={store}/></Tab.Pane> },
+        { menuItem: 'Chart', render: () => <canvas ref={canvas => this._refs.chartCanvas = canvas} /> },
+      ]} />
 
     </div>
   }
