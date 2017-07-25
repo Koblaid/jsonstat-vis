@@ -1,5 +1,7 @@
 import React, {Component} from 'react'
 import _ from 'lodash'
+import {observer} from 'mobx-react'
+import {extendObservable} from 'mobx'
 import chartJs from 'chart.js'
 
 import * as utils from './utils'
@@ -61,10 +63,24 @@ const renderChart = (ctx, chartDataSets, labels, chartType) => {
   })
 }
 
-const getDimensions = dataSet => dataSet ? dataSet.id : []
+
+class Store {
+  constructor(){
+    extendObservable(this, {
+      jsonstatUrl: 'http://data.ssb.no/api/v0/dataset/85430.json?lang=en',
+      dataSet: undefined,
+      chartType: 'bar',
+      groupDimension: '',
+      dataDimension: '',
+      get dimensions () {
+        return this.dataSet ? this.dataSet.id : []
+      }
+    })
+  }
+}
 
 
-export default class Configurator extends Component {
+const Configurator = observer(class Configurator extends Component {
   constructor(){
     super()
     this._refs = {}
@@ -72,45 +88,41 @@ export default class Configurator extends Component {
   }
 
   loadData(){
-    console.log('loaddata')
-    utils.getDataSet(this._refs.jsonstatUrlRef.value)
+    const {store} = this.props
+    utils.getDataSet(store.jsonstatUrl)
       .then((dataSet) => {
-        this.setState({dataSet})
+        store.dataSet = dataSet
       })
   }
 
-  updateForm(){
-    console.log(this)
+  renderChart(){
+    const {store} = this.props
+    console.log(store)
 
-    this.setState({
-      ...this.state,
-      chartType: this._refs.chartType.value,
-      groupDimension: this._refs.groupProperty.value,
-      dataDimension: this._refs.dataDimension.value,
-    })
-
-    if(!(this.state.chartType && this.state.groupDimension && this.state.dataDimension)){
+    if(!(store.chartType && store.groupDimension && store.dataDimension)){
+      console.log('not all fields are selected')
+      console.log(store.chartType , store.groupDimension , store.dataDimension)
       return
     }
     const chartCanvas = this._refs.chartCanvas
 
-    const {chartDataSets, labels} = prepareData(this.state.dataSet, this.state.groupDimension, this.state.dataDimension)
-    renderChart(chartCanvas, chartDataSets, labels, this.state.chartType)
+    const {chartDataSets, labels} = prepareData(store.dataSet, store.groupDimension, store.dataDimension)
+    renderChart(chartCanvas, chartDataSets, labels, store.chartType)
   }
 
   render(){
-    const {dataSet, groupDimension} = this.state
-    dataSet && console.log(dataSet)
+    const {store} = this.props
+
     return <div>
 
       <label>JSON-stat URL
-        <input type="text" ref={el => this._refs.jsonstatUrlRef = el} defaultValue="http://data.ssb.no/api/v0/dataset/85430.json?lang=en"/>
+        <input type="text" value={store.jsonstatUrl} onChange={(e) => store.jsonstatUrl = e.target.value}/>
       </label>
 
       <button onClick={() => this.loadData()}>Load data</button>
 
       <label>Chart-Typ
-        <select onChange={() => this.updateForm()} ref={el => this._refs.chartType = el} disabled={!dataSet}>
+        <select value={store.chartType} onChange={e => store.chartType = e.target.value} disabled={!store.dataSet}>
           <option>bar</option>
           <option>horizontalBar</option>
           <option>line</option>
@@ -118,17 +130,19 @@ export default class Configurator extends Component {
       </label>}
 
       <label>Group data by
-        <select onChange={() => this.updateForm()} ref={el => this._refs.groupProperty = el} disabled={!dataSet}>
-          {getDimensions(dataSet).map((dimension, i) => <option key={i}>{dimension}</option>)}
+        <select value={store.groupDimension} onChange={e => store.groupDimension = e.target.value} disabled={!store.dataSet}>
+          {store.dimensions.map((dimension, i) => <option key={i}>{dimension}</option>)}
         </select>
       </label>
 
       <label>Category label
-        <select onChange={() => this.updateForm()} ref={el => this._refs.dataDimension = el} disabled={!groupDimension}>
-          {getDimensions(dataSet).map((dimension, i) => <option key={i} disabled={dimension === groupDimension}>{dimension}</option>)}
+        <select value={store.dataDimension} onChange={e => store.dataDimension = e.target.value} disabled={!store.dataSet}>
+          {store.dimensions.map((dimension, i) => <option key={i}>{dimension}</option>)}
         </select>
       </label>}
 
+      <button onClick={() => this.renderChart()}>Render chart</button>
+      <br />
       <canvas ref={canvas => {
                 this._refs.chartCanvas = canvas
               }}
@@ -136,4 +150,8 @@ export default class Configurator extends Component {
 
     </div>
   }
-}
+})
+
+
+const store = new Store();
+export default () => <Configurator store={store} />
