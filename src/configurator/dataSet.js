@@ -4,17 +4,25 @@ import {extendObservable, action} from 'mobx'
 
 
 export default class DataSet {
-  constructor(){
+  constructor(data = {}){
     extendObservable(this, {
       ds: undefined,
-      jsonstatUrl: 'http://data.ssb.no/api/v0/dataset/85430.json?lang=en',
-      groupDimension: '',
-      dataDimension: '',
+      jsonstatUrl: data.jsonstatUrl || 'http://data.ssb.no/api/v0/dataset/85430.json?lang=en',
+      groupDimension: data.groupDimension || '',
+      dataDimension: data.dataDimension || '',
 
       setjsonStatUrl: action(v => this.jsonstatUrl = v),
       setDataSet: action(v => this.ds = v),
       setGroupDimension: action(v => this.groupDimension = v),
       setDataDimension: action(v => this.dataDimension = v),
+
+      toObject(){
+        return {
+          jsonstatUrl: this.jsonstatUrl,
+          groupDimension: this.groupDimension,
+          dataDimension: this.dataDimension,
+        }
+      },
 
       get isLoaded(){
         return Boolean(this.ds)
