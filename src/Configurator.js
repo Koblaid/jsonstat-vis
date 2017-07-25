@@ -46,6 +46,7 @@ class DataSet {
   constructor(){
     extendObservable(this, {
       ds: undefined,
+      jsonstatUrl: 'http://data.ssb.no/api/v0/dataset/85430.json?lang=en',
       groupDimension: '',
       dataDimension: '',
 
@@ -80,6 +81,12 @@ class DataSet {
         })
       },
 
+      load(){
+        utils.getDataSet(this.jsonstatUrl)
+          .then((dataSet) => {
+            this.ds = dataSet
+          })
+      },
       getTable(){
         if(!this.ds || !this.groupDimension || !this.dataDimension){
           return {}
@@ -108,7 +115,6 @@ class DataSet {
 class Store {
   constructor(){
     extendObservable(this, {
-      jsonstatUrl: 'http://data.ssb.no/api/v0/dataset/85430.json?lang=en',
       dataSet: new DataSet(),
       chartType: 'bar',
       get isReadyToRender(){
@@ -196,26 +202,16 @@ const Configurator = observer(class Configurator extends Component {
     this.state = {}
   }
 
-  loadData(){
-    const {store} = this.props
-    utils.getDataSet(store.jsonstatUrl)
-      .then((dataSet) => {
-        store.dataSet.ds = dataSet
-      })
-  }
-
-
-
   render(){
     const {store} = this.props
 
     return <div>
 
       <label>JSON-stat URL
-        <input type="text" value={store.jsonstatUrl} onChange={(e) => store.jsonstatUrl = e.target.value}/>
+        <input type="text" value={store.dataSet.jsonstatUrl} onChange={(e) => store.dataSet.jsonstatUrl = e.target.value}/>
       </label>
 
-      <button onClick={() => this.loadData()}>Load data</button>
+      <button onClick={() => store.dataSet.load()}>Load data</button>
 
       <label>Group data by
         <select value={store.dataSet.groupDimension} onChange={e => store.dataSet.groupDimension = e.target.value} disabled={!store.dataSet.isLoaded}>
