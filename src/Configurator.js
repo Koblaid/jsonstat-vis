@@ -172,6 +172,14 @@ const Chart = observer(class Chart extends Component {
 
   render(){
     return <div>
+      <label>Chart-Typ
+        <select value={store.chartType} onChange={e => store.chartType = e.target.value} disabled={!store.dataSet.isLoaded}>
+          <option>bar</option>
+          <option>horizontalBar</option>
+          <option>line</option>
+        </select>
+      </label>}
+
       <button onClick={() => this.renderChart()}>Render chart</button>
       <br />
       <canvas ref={canvas => this.chartCanvas = canvas} />
@@ -208,14 +216,6 @@ const Configurator = observer(class Configurator extends Component {
       </label>
 
       <button onClick={() => this.loadData()}>Load data</button>
-
-      <label>Chart-Typ
-        <select value={store.chartType} onChange={e => store.chartType = e.target.value} disabled={!store.dataSet.isLoaded}>
-          <option>bar</option>
-          <option>horizontalBar</option>
-          <option>line</option>
-        </select>
-      </label>}
 
       <label>Group data by
         <select value={store.dataSet.groupDimension} onChange={e => store.dataSet.groupDimension = e.target.value} disabled={!store.dataSet.isLoaded}>
