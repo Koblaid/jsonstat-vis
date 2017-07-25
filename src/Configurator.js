@@ -8,29 +8,6 @@ import chartJs from 'chart.js'
 import * as utils from './utils'
 
 
-const prepareData = (dataSet, groupDimension, dataDimension) => {
-  const groupedData = utils.groupBy(dataSet, groupDimension, dataDimension)
-  console.log(dataSet, groupDimension, dataDimension)
-  console.log(groupedData)
-
-  const sortedKeys = Object.keys(groupedData)
-  sortedKeys.sort()
-
-  const chartDataSets = _.map(dataSet.Dimension(dataDimension).id, dimensionValue => {
-    return {
-      label: dataSet.Dimension(dataDimension).Category(dimensionValue).label,
-      data: sortedKeys.map(key => groupedData[key].values[dimensionValue]),
-      backgroundColor: utils.getNextColor(),
-      borderWidth: 1,
-      fill: false,
-    }
-  })
-  const labels = sortedKeys.map(key => groupedData[key].label)
-
-  return {chartDataSets, labels}
-}
-
-
 const renderChart = (ctx, chartDataSets, labels, chartType) => {
   new chartJs(ctx, {
     type: chartType,
@@ -65,64 +42,143 @@ const renderChart = (ctx, chartDataSets, labels, chartType) => {
 }
 
 
+class DataSet {
+  constructor(){
+    extendObservable(this, {
+      ds: undefined,
+      groupDimension: '',
+      dataDimension: '',
+
+      get isLoaded(){
+        return Boolean(this.ds)
+      },
+
+      get dimensions () {
+        return this.ds ? this.ds.id : []
+      },
+
+      get groupedData(){
+        return utils.groupBy(this.ds, this.groupDimension, this.dataDimension)
+      },
+
+      get sortedKeys(){
+        const sortedKeys = Object.keys(this.groupedData)
+        sortedKeys.sort()
+        return sortedKeys
+      },
+
+      get labels(){
+        return this.sortedKeys.map(key => this.groupedData[key].label)
+      },
+
+      get columns(){
+        return _.map(this.ds.Dimension(this.dataDimension).id, dimensionValue => {
+          return {
+            label: this.ds.Dimension(this.dataDimension).Category(dimensionValue).label,
+            data: this.sortedKeys.map(key => this.groupedData[key].values[dimensionValue]),
+          }
+        })
+      },
+
+      getTable(){
+        if(!this.ds || !this.groupDimension || !this.dataDimension){
+          return {}
+        }
+        const columnIds = this.ds.Dimension(this.dataDimension).id
+        const header = [''].concat(_.map(columnIds, dimensionValue => {
+          return this.ds.Dimension(this.dataDimension).Category(dimensionValue).label || dimensionValue
+        }))
+
+        const body = this.sortedKeys.map(key => {
+          return [this.groupedData[key].label].concat(
+            columnIds.map(colId => this.groupedData[key].values[colId])
+          )
+        })
+
+        return {
+          header,
+          body,
+        }
+      }
+    })
+  }
+}
+
+
 class Store {
   constructor(){
     extendObservable(this, {
       jsonstatUrl: 'http://data.ssb.no/api/v0/dataset/85430.json?lang=en',
-      dataSet: undefined,
+      dataSet: new DataSet(),
       chartType: 'bar',
-      groupDimension: '',
-      dataDimension: '',
-      get dimensions () {
-        return this.dataSet ? this.dataSet.id : []
-      },
       get isReadyToRender(){
-        return store.chartType && store.groupDimension && store.dataDimension
+        return store.chartType && this.dataSet.groupDimension && store.dataSet.dataDimension
       },
     })
   }
 }
 
 
-const DataTable = ({store}) => {
-  const {dataSet, dataDimension, groupDimension} = store
-  if(!store.isReadyToRender){
+const DataTable = observer(({store}) => {
+  const {header, body} = store.getTable()
+  if(!header || !body){
     return null
   }
-
-  const columnIds = dataSet.Dimension(store.dataDimension).id
-  const columnLabels = _.map(columnIds, dimensionValue => {
-    return dataSet.Dimension(dataDimension).Category(dimensionValue).label
-  })
-
-  const groupedData = utils.groupBy(dataSet, groupDimension, dataDimension)
-
-  const sortedKeys = Object.keys(groupedData)
-  sortedKeys.sort()
 
   return (
     <Table celled padded>
       <Table.Header>
         <Table.Row>
-          <Table.HeaderCell></Table.HeaderCell>
-          {columnLabels.map(colHeader => <Table.HeaderCell>{colHeader}</Table.HeaderCell>)}
+          {header.map((colHeader, index) => <Table.HeaderCell key={index}>{colHeader}</Table.HeaderCell>)}
         </Table.Row>
       </Table.Header>
 
       <Table.Body>
-        {sortedKeys.map(key => {
-          return <Table.Row>
-              <Table.Cell>{groupedData[key].label}</Table.Cell>
-              {columnIds.map(colId => {
-                return <Table.Cell>{groupedData[key].values[colId]}</Table.Cell>
-              })}
-
+        {body.map((row, index1) => {
+          return <Table.Row key={index1}>
+              {row.map((column, index2) => <Table.Cell key={index2}>{column}</Table.Cell>)}
           </Table.Row>
         })}
       </Table.Body>
     </Table>
   )
-}
+})
+
+
+const Chart = observer(class Chart extends Component {
+  renderChart(){
+    const {store} = this.props
+
+    if(!(store.isReadyToRender)){
+      console.log('not all fields are selected')
+      console.log(store.chartType , store.dataSet.groupDimension , store.dataSet.dataDimension)
+      return
+    }
+    const chartCanvas = this.chartCanvas
+
+    const chartDataSets = store.dataSet.columns.map(column => {
+      return {
+        label: column.label,
+        data: column.data,
+        backgroundColor: utils.getNextColor(),
+        borderWidth: 1,
+        fill: false,
+      }
+    })
+    const labels = store.dataSet.labels
+
+    renderChart(chartCanvas, chartDataSets, labels, store.chartType)
+  }
+
+  render(){
+    return <div>
+      <button onClick={() => this.renderChart()}>Render chart</button>
+      <br />
+      <canvas ref={canvas => this.chartCanvas = canvas} />
+    </div>
+  }
+
+})
 
 
 const Configurator = observer(class Configurator extends Component {
@@ -136,24 +192,11 @@ const Configurator = observer(class Configurator extends Component {
     const {store} = this.props
     utils.getDataSet(store.jsonstatUrl)
       .then((dataSet) => {
-        store.dataSet = dataSet
+        store.dataSet.ds = dataSet
       })
   }
 
-  renderChart(){
-    const {store} = this.props
-    console.log(store)
 
-    if(!(store.isReadyToRender)){
-      console.log('not all fields are selected')
-      console.log(store.chartType , store.groupDimension , store.dataDimension)
-      return
-    }
-    const chartCanvas = this._refs.chartCanvas
-
-    const {chartDataSets, labels} = prepareData(store.dataSet, store.groupDimension, store.dataDimension)
-    renderChart(chartCanvas, chartDataSets, labels, store.chartType)
-  }
 
   render(){
     const {store} = this.props
@@ -167,7 +210,7 @@ const Configurator = observer(class Configurator extends Component {
       <button onClick={() => this.loadData()}>Load data</button>
 
       <label>Chart-Typ
-        <select value={store.chartType} onChange={e => store.chartType = e.target.value} disabled={!store.dataSet}>
+        <select value={store.chartType} onChange={e => store.chartType = e.target.value} disabled={!store.dataSet.isLoaded}>
           <option>bar</option>
           <option>horizontalBar</option>
           <option>line</option>
@@ -175,22 +218,20 @@ const Configurator = observer(class Configurator extends Component {
       </label>}
 
       <label>Group data by
-        <select value={store.groupDimension} onChange={e => store.groupDimension = e.target.value} disabled={!store.dataSet}>
-          {store.dimensions.map((dimension, i) => <option key={i}>{dimension}</option>)}
+        <select value={store.dataSet.groupDimension} onChange={e => store.dataSet.groupDimension = e.target.value} disabled={!store.dataSet.isLoaded}>
+          {store.dataSet.dimensions.map((dimension, i) => <option key={i}>{dimension}</option>)}
         </select>
       </label>
 
       <label>Category label
-        <select value={store.dataDimension} onChange={e => store.dataDimension = e.target.value} disabled={!store.dataSet}>
-          {store.dimensions.map((dimension, i) => <option key={i}>{dimension}</option>)}
+        <select value={store.dataSet.dataDimension} onChange={e => store.dataSet.dataDimension = e.target.value} disabled={!store.dataSet.isLoaded}>
+          {store.dataSet.dimensions.map((dimension, i) => <option key={i}>{dimension}</option>)}
         </select>
       </label>}
 
-      <button onClick={() => this.renderChart()}>Render chart</button>
-      <br />
       <Tab panes={[
-        { menuItem: 'Data', render: () => <Tab.Pane><DataTable store={store}/></Tab.Pane> },
-        { menuItem: 'Chart', render: () => <canvas ref={canvas => this._refs.chartCanvas = canvas} /> },
+        { menuItem: 'Data', render: () => <Tab.Pane><DataTable store={store.dataSet}/></Tab.Pane> },
+        { menuItem: 'Chart', render: () => <Tab.Pane><Chart store={store} /></Tab.Pane> },
       ]} />
 
     </div>
