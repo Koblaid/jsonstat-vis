@@ -28,6 +28,10 @@ export default class DataSet {
         return Boolean(this.ds)
       },
 
+      get label(){
+        return this.ds.label
+      },
+
       get dimensions () {
         return this.ds ? this.ds.id : []
       },

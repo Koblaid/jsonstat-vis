@@ -5,7 +5,7 @@ import { Dropdown, Form } from 'semantic-ui-react'
 import * as utils from '../utils'
 
 
-const renderChart = (ctx, chartDataSets, labels, chartType) => {
+const renderChart = (ctx, chartLabel, chartDataSets, labels, chartType) => {
   new chartJs(ctx, {
     type: chartType,
     data: {
@@ -16,7 +16,7 @@ const renderChart = (ctx, chartDataSets, labels, chartType) => {
       responsive: true,
       title:{
         display:true,
-        text:'Chart.js Line Chart'
+        text: chartLabel,
       },
       scales: {
         xAxes: [{
@@ -61,7 +61,7 @@ const Chart = observer(class Chart extends Component {
     })
     const labels = store.dataSet.labels
 
-    renderChart(chartCanvas, chartDataSets, labels, store.chartType)
+    renderChart(chartCanvas, store.dataSet.label, chartDataSets, labels, store.chartType)
   }
 
   render(){
