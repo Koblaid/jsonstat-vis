@@ -2,8 +2,7 @@ import React from 'react'
 import {observer} from 'mobx-react'
 import { Table } from 'semantic-ui-react'
 
-const DataTable = observer(({store}) => {
-  const {header, body} = store.getTable()
+const DataTable = observer(({header, body}) => {
   if(!header || !body){
     return null
   }

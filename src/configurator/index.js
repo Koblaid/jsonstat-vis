@@ -30,6 +30,8 @@ class Store {
 
 
 const Configurator = observer(({store}) => {
+  const {header: tableHeader, body: tableBody} = store.dataSet.getTable()
+
   return <div>
     <Form>
       <Form.Group inline>
@@ -94,7 +96,7 @@ const Configurator = observer(({store}) => {
 
 
     <Tab panes={[
-      { menuItem: 'Data', render: () => <Tab.Pane><DataTable store={store.dataSet}/></Tab.Pane> },
+      { menuItem: 'Data', render: () => <Tab.Pane><DataTable header={tableHeader} body={tableBody} /></Tab.Pane> },
       { menuItem: 'Chart', render: () => <Tab.Pane><Chart store={store} /></Tab.Pane> },
     ]} />
 
