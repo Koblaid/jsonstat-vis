@@ -29,7 +29,15 @@ export default class DataSet {
       },
 
       get label(){
-        return this.ds.label
+        return this.ds && this.ds.label
+      },
+
+      get source(){
+        return this.ds && this.ds.source
+      },
+
+      get updated(){
+        return this.ds && this.ds.updated
       },
 
       get dimensions () {

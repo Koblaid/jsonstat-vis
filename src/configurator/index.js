@@ -44,6 +44,21 @@ const Configurator = observer(({store}) => {
         <Form.Button onClick={() => store.dataSet.load()}>Load data</Form.Button>
       </Form.Group>
 
+      <Form.Group inline>
+        <Form.Field>
+          <label>DataSet</label>
+          <span>{store.dataSet.label}</span>
+        </Form.Field>
+        <Form.Field>
+          <label>Source</label>
+          <span>{store.dataSet.source}</span>
+        </Form.Field>
+        <Form.Field>
+          <label>Updated</label>
+          <span>{store.dataSet.updated}</span>
+        </Form.Field>
+      </Form.Group>
+
       <Form.Group>
         <Form.Field inline>
           <label>Group data by</label>
