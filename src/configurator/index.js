@@ -30,7 +30,8 @@ class Store {
 
 
 const Configurator = observer(({store}) => {
-  const {header: tableHeader, body: tableBody} = store.dataSet.getTable()
+  const {header: rawTableHeader, body: rawTableBody} = store.dataSet.getRawTable()
+  const {header: groupedTableHeader, body: groupedTableBody} = store.dataSet.getGroupedTable()
 
   return <div>
     <Form>
@@ -96,7 +97,8 @@ const Configurator = observer(({store}) => {
 
 
     <Tab panes={[
-      { menuItem: 'Data', render: () => <Tab.Pane><DataTable header={tableHeader} body={tableBody} /></Tab.Pane> },
+      { menuItem: 'Raw Data', render: () => <Tab.Pane><DataTable header={rawTableHeader} body={rawTableBody} /></Tab.Pane> },
+      { menuItem: 'Grouped Data', render: () => <Tab.Pane><DataTable header={groupedTableHeader} body={groupedTableBody} /></Tab.Pane> },
       { menuItem: 'Chart', render: () => <Tab.Pane><Chart store={store} /></Tab.Pane> },
     ]} />
 

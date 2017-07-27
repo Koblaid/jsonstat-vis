@@ -74,7 +74,18 @@ export default class DataSet {
           })
       },
 
-      getTable(){
+      getRawTable(){
+        if(!this.ds){
+          return {}
+        }
+        const header = this.ds.id.concat('value')
+        const body = this.ds.toTable({ type: 'arrobj', content: 'id'}).map(row => {
+          return header.map(colName => row[colName])
+        })
+        return {header, body}
+      },
+
+      getGroupedTable(){
         if(!this.ds || !this.groupDimension || !this.dataDimension || this.groupDimension === this.dataDimension){
           return {}
         }
