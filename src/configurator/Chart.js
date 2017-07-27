@@ -1,6 +1,7 @@
 import React, {Component} from 'react'
 import {observer} from 'mobx-react'
 import chartJs from 'chart.js'
+import { Dropdown, Form } from 'semantic-ui-react'
 import * as utils from '../utils'
 
 
@@ -66,17 +67,32 @@ const Chart = observer(class Chart extends Component {
   render(){
     const {store} = this.props
 
-    return <div>
-      <label>Chart-Typ
-        <select value={store.chartType} onChange={e => store.setChartType(e.target.value)} disabled={!store.dataSet.isLoaded}>
-          <option>bar</option>
-          <option>horizontalBar</option>
-          <option>line</option>
-        </select>
-      </label>}
+    const chartTypes = [{
+      text: 'Bar chart',
+      value: 'bar',
+    }, {
+      text: 'Horizontal bar chart',
+      value: 'horizontalBar',
+    }, {
+      text: 'Line chart',
+      value: 'line'
+    }]
 
-      <button onClick={() => this.renderChart()}>Render chart</button>
-      <br />
+    return <div>
+      <Form>
+        <Form.Group inline>
+          <Form.Field>
+            <label>Chart-Typ</label>
+            <Dropdown placeholder='Select a chart type...'
+                      selection
+                      options={chartTypes}
+                      value={store.chartType}
+                      onChange={(event, data) => store.setChartType(data.value)} />
+          </Form.Field>
+          <Form.Button onClick={() => this.renderChart()}>Render chart</Form.Button>
+        </Form.Group>
+      </Form>
+
       <canvas ref={canvas => this.chartCanvas = canvas} />
     </div>
   }
