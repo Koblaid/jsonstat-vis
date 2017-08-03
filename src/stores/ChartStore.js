@@ -2,7 +2,7 @@ import {extendObservable, action} from 'mobx'
 import DataSetStore from './DataSetStore'
 
 
-export default class Store {
+export default class ChartStore {
   constructor(data = {}){
     extendObservable(this, {
       dataSet: new DataSetStore(data.dataSet),
