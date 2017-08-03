@@ -2,10 +2,8 @@ import React from 'react'
 import { Tab, Form, Dropdown } from 'semantic-ui-react'
 import {observer} from 'mobx-react'
 
-import ChartStore from '../stores/ChartStore'
 import DataTable from './DataTable'
 import Chart from './Chart'
-import * as utils from '../utils'
 
 
 const Configurator = observer(({store}) => {
@@ -85,11 +83,4 @@ const Configurator = observer(({store}) => {
 })
 
 
-const urlParameter = utils.getParameterByNameFromUrl('json')
-const data = urlParameter ? JSON.parse(urlParameter) : {}
-
-const store = new ChartStore(data);
-if(urlParameter){
-  store.dataSet.load()
-}
-export default () => <Configurator store={store} />
+export default Configurator
