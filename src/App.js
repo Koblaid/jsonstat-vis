@@ -22,6 +22,7 @@ const rootStore = new RootStore()
 if(urlParameter){
   rootStore.addTab(data)
 }
+rootStore.loadNorwayDataSets()
 
 const staticPanes = [
   { menuItem: 'Start', render: () => <Tab.Pane><Chooser store={rootStore}/></Tab.Pane> },

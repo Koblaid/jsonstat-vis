@@ -7,7 +7,7 @@ export default class DataSetStore {
   constructor(data = {}){
     extendObservable(this, {
       ds: undefined,
-      jsonstatUrl: data.jsonstatUrl || 'http://data.ssb.no/api/v0/dataset/85430.json?lang=en',
+      jsonstatUrl: data.jsonstatUrl,
       groupDimension: data.groupDimension || '',
       dataDimension: data.dataDimension || '',
 
