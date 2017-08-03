@@ -5,6 +5,7 @@ import {observer} from 'mobx-react'
 import ChartStore from '../stores/ChartStore'
 import DataTable from './DataTable'
 import Chart from './Chart'
+import * as utils from '../utils'
 
 
 const Configurator = observer(({store}) => {
@@ -84,19 +85,7 @@ const Configurator = observer(({store}) => {
 })
 
 
-// https://stackoverflow.com/a/901144/4287172
-function getParameterByName(name, url) {
-  if (!url) url = window.location.href
-  name = name.replace(/[\[\]]/g, "\\$&")
-  const regex = new RegExp(`[?&]${name}(=([^&#]*)|&|#|$)`)
-  const results = regex.exec(url)
-  if (!results) return null
-  if (!results[2]) return ''
-  return decodeURIComponent(results[2].replace(/\+/g, " "))
-}
-
-
-const urlParameter = getParameterByName('json')
+const urlParameter = utils.getParameterByNameFromUrl('json')
 const data = urlParameter ? JSON.parse(urlParameter) : {}
 
 const store = new ChartStore(data);
