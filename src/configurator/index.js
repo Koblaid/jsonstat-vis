@@ -1,32 +1,10 @@
 import React from 'react'
-import {extendObservable, action} from 'mobx'
 import { Tab, Form, Dropdown } from 'semantic-ui-react'
 import {observer} from 'mobx-react'
 
-import DataSet from './dataSet'
+import ChartStore from '../stores/ChartStore'
 import DataTable from './DataTable'
 import Chart from './Chart'
-
-
-class Store {
-  constructor(data = {}){
-    extendObservable(this, {
-      dataSet: new DataSet(data.dataSet),
-      setChartType: action(v => this.chartType = v),
-      chartType: data.chartType || 'bar',
-      get isReadyToRender(){
-        return this.chartType && this.dataSet.groupDimension && this.dataSet.dataDimension
-      },
-
-      toObject(){
-        return {
-          chartType: this.chartType,
-          dataSet: this.dataSet.toObject(),
-        }
-      },
-    })
-  }
-}
 
 
 const Configurator = observer(({store}) => {
@@ -121,7 +99,7 @@ function getParameterByName(name, url) {
 const urlParameter = getParameterByName('json')
 const data = urlParameter ? JSON.parse(urlParameter) : {}
 
-const store = new Store(data);
+const store = new ChartStore(data);
 if(urlParameter){
   store.dataSet.load()
 }

@@ -3,7 +3,7 @@ import _ from 'lodash'
 import {extendObservable, action} from 'mobx'
 
 
-export default class DataSet {
+export default class DataSetStore {
   constructor(data = {}){
     extendObservable(this, {
       ds: undefined,
