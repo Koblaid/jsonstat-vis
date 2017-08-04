@@ -1,6 +1,6 @@
 import React from 'react'
 import {observer} from 'mobx-react'
-import { Form, Dropdown } from 'semantic-ui-react'
+import { Form } from 'semantic-ui-react'
 
 import { DATA_SOURCES } from './stores/index'
 

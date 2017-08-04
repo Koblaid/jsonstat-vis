@@ -70,7 +70,7 @@ export const groupBy = (dataset, groupDimension, dataDimension, filters, rejects
 // https://stackoverflow.com/a/901144/4287172
 export const getParameterByNameFromUrl = (name, url) => {
   if (!url) url = window.location.href
-  name = name.replace(/[\[\]]/g, "\\$&")
+  name = name.replace(/[\[\]]/g, "\\$&") // eslint-disable-line no-useless-escape
   const regex = new RegExp(`[?&]${name}(=([^&#]*)|&|#|$)`)
   const results = regex.exec(url)
   if (!results) return null
@@ -82,6 +82,6 @@ export const getParameterByNameFromUrl = (name, url) => {
 // https://stackoverflow.com/a/2117523/4287172
 export const uuidv4 = () => {
   return ([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g, c =>
-    (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16)
+    (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16) // eslint-disable-line no-mixed-operators
   )
 }
