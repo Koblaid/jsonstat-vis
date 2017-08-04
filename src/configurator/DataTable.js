@@ -1,28 +1,36 @@
 import React from 'react'
 import {observer} from 'mobx-react'
-import { Table } from 'semantic-ui-react'
+import { Grid } from 'react-virtualized'
+
 
 const DataTable = observer(({header, body}) => {
   if(!header || !body){
     return null
   }
 
-  return (
-    <Table celled padded>
-      <Table.Header>
-        <Table.Row>
-          {header.map((colHeader, index) => <Table.HeaderCell key={index}>{colHeader}</Table.HeaderCell>)}
-        </Table.Row>
-      </Table.Header>
+  const rows = [header].concat(body)
 
-      <Table.Body>
-        {body.map((row, index1) => {
-          return <Table.Row key={index1}>
-            {row.map((column, index2) => <Table.Cell key={index2}>{column}</Table.Cell>)}
-          </Table.Row>
-        })}
-      </Table.Body>
-    </Table>
+
+  const cellRenderer = ({ columnIndex, key, rowIndex, style }) => {
+    const content = rows[rowIndex][columnIndex]
+    return (
+      <div key={key} style={style}>
+        {rowIndex ? <span>{content}</span> : <strong>{content}</strong>}
+      </div>
+    )
+  }
+
+
+  return (
+    <Grid
+      cellRenderer={cellRenderer}
+      columnCount={rows[0].length}
+      columnWidth={100}
+      height={600}
+      rowCount={rows.length}
+      rowHeight={30}
+      width={1000}
+    />
   )
 })
 
