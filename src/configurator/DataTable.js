@@ -1,6 +1,8 @@
 import React from 'react'
 import {observer} from 'mobx-react'
-import { Grid } from 'react-virtualized'
+import ReactTable from 'react-table'
+import 'react-table/react-table.css'
+
 
 
 const DataTable = observer(({header, body}) => {
@@ -8,30 +10,13 @@ const DataTable = observer(({header, body}) => {
     return null
   }
 
-  const rows = [header].concat(body)
+  const columns = header.map((name, index) => ({
+    Header: name,
+    accessor: row => row[index],
+    id: index.toString(),
+  }))
 
-
-  const cellRenderer = ({ columnIndex, key, rowIndex, style }) => {
-    const content = rows[rowIndex][columnIndex]
-    return (
-      <div key={key} style={style}>
-        {rowIndex ? <span>{content}</span> : <strong>{content}</strong>}
-      </div>
-    )
-  }
-
-
-  return (
-    <Grid
-      cellRenderer={cellRenderer}
-      columnCount={rows[0].length}
-      columnWidth={100}
-      height={600}
-      rowCount={rows.length}
-      rowHeight={30}
-      width={1000}
-    />
-  )
+  return <ReactTable data={body} columns={columns} filterable />
 })
 
 
