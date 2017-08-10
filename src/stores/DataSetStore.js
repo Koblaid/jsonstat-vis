@@ -79,7 +79,7 @@ export default class DataSetStore {
           return {}
         }
         const header = this.ds.id.concat('value')
-        const body = this.ds.toTable({ type: 'arrobj', content: 'id'}).map(row => {
+        const body = this.ds.toTable({ type: 'arrobj'}).map(row => {
           return header.map(colName => row[colName])
         })
         return {header, body}
