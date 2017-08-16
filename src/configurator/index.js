@@ -13,18 +13,6 @@ const Configurator = observer(({store}) => {
   return <div>
     <Form>
       <Form.Group inline>
-        <Form.Input
-          label="JSON-stat URL"
-          labelPosition="left"
-          value={store.dataSet.jsonstatUrl}
-          onChange={(e) => store.dataSet.setjsonStatUrl(e.target.value)}
-          width={6}
-        />
-
-        <Form.Button onClick={() => store.dataSet.load()}>Load data</Form.Button>
-      </Form.Group>
-
-      <Form.Group inline>
         <Form.Field>
           <label>DataSet</label>
           <span>{store.dataSet.label}</span>

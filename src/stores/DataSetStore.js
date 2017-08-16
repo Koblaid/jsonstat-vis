@@ -11,7 +11,6 @@ export default class DataSetStore {
       groupDimension: data.groupDimension || '',
       dataDimension: data.dataDimension || '',
 
-      setjsonStatUrl: action(v => this.jsonstatUrl = v),
       setDataSet: action(v => this.ds = v),
       setGroupDimension: action(v => this.groupDimension = v),
       setDataDimension: action(v => this.dataDimension = v),
