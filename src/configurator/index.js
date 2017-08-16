@@ -1,14 +1,14 @@
 import React from 'react'
-import { Tab, Form, Dropdown } from 'semantic-ui-react'
+import { Tab, Form } from 'semantic-ui-react'
 import {observer} from 'mobx-react'
 
 import DataTable from './DataTable'
 import Chart from './Chart'
+import GroupData from './GroupData'
 
 
 const Configurator = observer(({store}) => {
   const {header: rawTableHeader, body: rawTableBody} = store.dataSet.getRawTable()
-  const {header: groupedTableHeader, body: groupedTableBody} = store.dataSet.getGroupedTable()
 
   return <div>
     <Form>
@@ -27,29 +27,7 @@ const Configurator = observer(({store}) => {
         </Form.Field>
       </Form.Group>
 
-      <Form.Group>
-        <Form.Field inline>
-          <label>Group data by</label>
-          <Dropdown
-            selection
-            options={store.dataSet.dimensions.map(dim => ({value: dim, text: dim}))}
-            value={store.dataSet.groupDimension}
-            onChange={(event, data) => store.dataSet.setGroupDimension(data.value)}
-            disabled={!store.dataSet.isLoaded}>
-          </Dropdown>
-        </Form.Field>
 
-        <Form.Field inline>
-          <label>Category label</label>
-          <Dropdown
-            selection
-            options={store.dataSet.dimensions.map(dim => ({value: dim, text: dim}))}
-            value={store.dataSet.dataDimension}
-            onChange={(event, data) => store.dataSet.setDataDimension(data.value)}
-            disabled={!store.dataSet.isLoaded}>
-          </Dropdown>
-        </Form.Field>
-      </Form.Group>
 
       <Form.Group inline>
         <Form.Field>
@@ -63,7 +41,7 @@ const Configurator = observer(({store}) => {
 
     <Tab panes={[
       { menuItem: 'Raw Data', render: () => <Tab.Pane><DataTable header={rawTableHeader} body={rawTableBody} /></Tab.Pane> },
-      { menuItem: 'Grouped Data', render: () => <Tab.Pane><DataTable header={groupedTableHeader} body={groupedTableBody} /></Tab.Pane> },
+      { menuItem: 'Grouped Data', render: () => <Tab.Pane><GroupData store={store} /> </Tab.Pane> },
       { menuItem: 'Chart', render: () => <Tab.Pane><Chart store={store} /></Tab.Pane> },
     ]} />
 
